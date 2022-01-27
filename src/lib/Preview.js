@@ -43,7 +43,7 @@ import {
 import {
     API_HOST,
     APP_HOST,
-    FOLLOZE_HOST_BODY,
+    FOLLOZE_ALTERNATIVE_HOST,
     CLASS_NAVIGATION_VISIBILITY,
     ERROR_CODE_403_FORBIDDEN_BY_POLICY,
     PERMISSION_PREVIEW,
@@ -1085,13 +1085,13 @@ class Preview extends EventEmitter {
      * @return {void}
      */
     handleFileInfoResponse(response) {
-        response.authenticated_download_url = response.authenticated_download_url.replace(BOX_CLOUD, FOLLOZE_HOST_BODY);
+        response.authenticated_download_url = response.authenticated_download_url.replace(BOX_CLOUD, FOLLOZE_ALTERNATIVE_HOST);
         response.authenticated_download_url = response.authenticated_download_url.replace('/api', '/downloads/api');
 
         response.representations.entries.forEach(entry => {
-            entry.content.url_template = entry.content.url_template.replace(BOX_CLOUD, FOLLOZE_HOST_BODY);
+            entry.content.url_template = entry.content.url_template.replace(BOX_CLOUD, FOLLOZE_ALTERNATIVE_HOST);
             entry.content.url_template = entry.content.url_template.replace('/api', '/downloads/api');
-            entry.info.url = entry.info.url.replace(BOX_API, `${FOLLOZE_HOST_BODY}.com`);
+            entry.info.url = entry.info.url.replace(BOX_API, `${FOLLOZE_ALTERNATIVE_HOST}`);
         });
 
         let file = response;
