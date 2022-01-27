@@ -2,7 +2,7 @@ import { FOLLOZE_ALTERNATIVE_HOST } from './constants';
 import { openUrlInsideIframe, isLocalStorageAvailable } from './util';
 
 const DEFAULT_DOWNLOAD_HOST_PREFIX = 'https://';
-const PROD_CUSTOM_HOST_SUFFIX = `${FOLLOZE_ALTERNATIVE_HOST}.com`;
+const PROD_CUSTOM_HOST_SUFFIX = `${FOLLOZE_ALTERNATIVE_HOST}`;
 const DOWNLOAD_NOTIFICATION_SHOWN_KEY = 'download_host_notification_shown';
 const DOWNLOAD_HOST_FALLBACK_KEY = 'download_host_fallback';
 const CUSTOM_HOST_PREFIX_REGEX = /^https:\/\/.+?\./;
