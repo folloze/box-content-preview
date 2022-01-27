@@ -76,11 +76,15 @@ export const SELECTOR_BOX_PREVIEW_NOTIFICATION = `.${CLASS_BOX_PREVIEW_NOTIFICAT
 export const PERMISSION_DOWNLOAD = 'can_download';
 export const PERMISSION_PREVIEW = 'can_preview';
 
-export const FOLLOZE_HOST = 'https://content-preview.folloze.com';
-export const FOLLOZE_URL = `${FOLLOZE_HOST}/platform/preview/`;
+export const FOLLOZE_ALTERNATIVE_HOST = 'content-preview.folloze.com';
+export const FOLLOZE_ALTERNATIVE_HOST_WITH_PROTOCOL = `https://${FOLLOZE_ALTERNATIVE_HOST}`;
+export const FOLLOZE_URL = `${FOLLOZE_ALTERNATIVE_HOST_WITH_PROTOCOL}/platform/preview/`;
 
-export const API_HOST = `${FOLLOZE_HOST}/api`;
-export const APP_HOST = `${FOLLOZE_HOST}/app`;
+export const API_HOST = `${FOLLOZE_ALTERNATIVE_HOST_WITH_PROTOCOL}/api`;
+export const APP_HOST = `${FOLLOZE_ALTERNATIVE_HOST_WITH_PROTOCOL}/app`;
+
+export const BOX_API = 'api.box.com';
+export const BOX_CLOUD = 'dl.boxcloud.com';
 
 export const ORIGINAL_REP_NAME = 'ORIGINAL';
 export const PRELOAD_REP_NAME = 'jpg';
