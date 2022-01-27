@@ -43,6 +43,7 @@ import {
 import {
     API_HOST,
     APP_HOST,
+    FOLLOZE_HOST_BODY,
     CLASS_NAVIGATION_VISIBILITY,
     ERROR_CODE_403_FORBIDDEN_BY_POLICY,
     PERMISSION_PREVIEW,
@@ -53,6 +54,8 @@ import {
     X_REP_HINT_VIDEO_DASH,
     X_REP_HINT_VIDEO_MP4,
     FILE_OPTION_FILE_VERSION_ID,
+    BOX_CLOUD,
+    BOX_API
 } from './constants';
 import {
     DURATION_METRIC,
@@ -1082,6 +1085,15 @@ class Preview extends EventEmitter {
      * @return {void}
      */
     handleFileInfoResponse(response) {
+        response.authenticated_download_url = response.authenticated_download_url.replace(BOX_CLOUD, FOLLOZE_HOST_BODY);
+        response.authenticated_download_url = response.authenticated_download_url.replace('/api', '/downloads/api');
+
+        response.representations.entries.forEach(entry => {
+            entry.content.url_template = entry.content.url_template.replace(BOX_CLOUD, FOLLOZE_HOST_BODY);
+            entry.content.url_template = entry.content.url_template.replace('/api', '/downloads/api');
+            entry.info.url = entry.info.url.replace(BOX_API, `${FOLLOZE_HOST_BODY}.com`);
+        });
+
         let file = response;
 
         // Stop timer for file info time event.
