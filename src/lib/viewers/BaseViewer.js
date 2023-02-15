@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import cloneDeep from 'lodash/cloneDeep';
 import debounce from 'lodash/debounce';
+import FocusTrap from '../FocusTrap';
 import fullscreen from '../Fullscreen';
 import intlUtil from '../i18n';
 import RepStatus from '../RepStatus';
@@ -23,6 +24,7 @@ import {
     CLASS_ANNOTATIONS_CREATE_HIGHLIGHT,
     CLASS_ANNOTATIONS_CREATE_REGION,
     CLASS_ANNOTATIONS_DISCOVERABLE,
+    CLASS_ANNOTATIONS_ONLY_CONTROLS,
     CLASS_BOX_PREVIEW_MOBILE,
     FILE_OPTION_START,
     SELECTOR_BOX_PREVIEW_BTN_ANNOTATE_DRAW,
@@ -78,6 +80,9 @@ class BaseViewer extends EventEmitter {
 
     /** @property {boolean} - Flag for tracking whether or not this viewer has been destroyed */
     destroyed = false;
+
+    /** @property {FocusTrap} - FocusTrap instance, if any */
+    focusTrap;
 
     /** @property {number} - Number of milliseconds to wait, while loading, until messaging that the viewer took too long to load */
     loadTimeout;
@@ -211,9 +216,8 @@ class BaseViewer extends EventEmitter {
             this.rootEl.classList.add(CLASS_BOX_PREVIEW_MOBILE);
         }
 
-        // Creates a promise that the annotator will be constructed if annotations are
-        // enabled and the expiring embed is not a shared link
-        if (this.areAnnotationsEnabled() && !this.options.sharedLink) {
+        // Creates a promise that the annotator will be constructed if annotations are enabled
+        if (this.areAnnotationsEnabled()) {
             this.annotatorPromise = new Promise(resolve => {
                 this.annotatorPromiseResolver = resolve;
             });
@@ -221,6 +225,10 @@ class BaseViewer extends EventEmitter {
 
         if (this.options.enableAnnotationsDiscoverability && this.containerEl) {
             this.containerEl.classList.add(CLASS_ANNOTATIONS_DISCOVERABLE);
+        }
+
+        if (this.options.enableAnnotationsOnlyControls && this.containerEl) {
+            this.containerEl.classList.add(CLASS_ANNOTATIONS_ONLY_CONTROLS);
         }
 
         this.isSetup = true;
@@ -261,10 +269,15 @@ class BaseViewer extends EventEmitter {
         document.defaultView.removeEventListener('resize', this.debouncedResizeHandler);
         this.removeAllListeners();
 
+        if (this.focusTrap) {
+            this.focusTrap.destroy();
+        }
+
         if (this.containerEl) {
             this.containerEl.removeEventListener('contextmenu', this.preventDefault);
             this.containerEl.innerHTML = '';
             this.containerEl.classList.remove(CLASS_ANNOTATIONS_DISCOVERABLE);
+            this.containerEl.classList.remove(CLASS_ANNOTATIONS_ONLY_CONTROLS);
         }
 
         // Destroy the annotator
@@ -282,6 +295,7 @@ class BaseViewer extends EventEmitter {
         this.annotatorPromiseResolver = null;
         this.emittedMetrics = null;
         this.fullscreenToggleEl = null;
+        this.focusTrap = null;
         this.emit('destroy');
     }
 
@@ -579,6 +593,17 @@ class BaseViewer extends EventEmitter {
         if (this.fullscreenToggleEl && this.fullscreenToggleEl.focus) {
             this.fullscreenToggleEl.focus();
         }
+
+        try {
+            if (!this.focusTrap) {
+                this.focusTrap = new FocusTrap(this.containerEl);
+            }
+
+            this.focusTrap.enable();
+        } catch (error) {
+            // eslint-disable-next-line
+            console.error('Unable to enable focus trap around Preview content');
+        }
     }
 
     /**
@@ -592,6 +617,10 @@ class BaseViewer extends EventEmitter {
         if (this.annotator && this.areNewAnnotationsEnabled()) {
             this.annotator.emit(ANNOTATOR_EVENT.setVisibility, true);
             this.enableAnnotationControls();
+        }
+
+        if (this.focusTrap) {
+            this.focusTrap.disable();
         }
     }
 

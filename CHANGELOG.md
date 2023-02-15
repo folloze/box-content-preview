@@ -1,3 +1,67 @@
+## 2.90.0 (2023-01-25)
+
+* revert package.json change (#1469) ([96b9198](https://github.com/box/box-content-preview/commit/96b9198)), closes [#1469](https://github.com/box/box-content-preview/issues/1469)
+* fix(pdf): fix for blurry/pixelated images (#1466) ([b749108](https://github.com/box/box-content-preview/commit/b749108)), closes [#1466](https://github.com/box/box-content-preview/issues/1466)
+
+
+
+## 2.89.0 (2023-01-10)
+
+* fix(iframe): Allow hyperlinks to be opened (#1464) ([7c07e57](https://github.com/box/box-content-preview/commit/7c07e57)), closes [#1464](https://github.com/box/box-content-preview/issues/1464)
+
+
+
+## 2.88.0 (2022-10-13)
+
+* feat(annotations): Allow annotations for editable shared links (#1462) ([96306c9](https://github.com/box/box-content-preview/commit/96306c9)), closes [#1462](https://github.com/box/box-content-preview/issues/1462)
+
+
+
+## 2.87.0 (2022-08-02)
+
+* fix(document): Re-enable DocBaseViewer tests (#1461) ([24b7967](https://github.com/box/box-content-preview/commit/24b7967)), closes [#1461](https://github.com/box/box-content-preview/issues/1461)
+
+
+
+## 2.86.0 (2022-07-13)
+
+* feat(viewer): Upgrade pdf.js to latest for modern browsers (#1441) ([18eed4f](https://github.com/box/box-content-preview/commit/18eed4f)), closes [#1441](https://github.com/box/box-content-preview/issues/1441)
+
+
+
+## 2.85.0 (2022-07-06)
+
+* chore(i18n): Update Translations (#1447) ([b111cf2](https://github.com/box/box-content-preview/commit/b111cf2)), closes [#1447](https://github.com/box/box-content-preview/issues/1447)
+* chore(i18n): Update Translations (#1454) ([7ebcd4e](https://github.com/box/box-content-preview/commit/7ebcd4e)), closes [#1454](https://github.com/box/box-content-preview/issues/1454)
+* feat(annotations): Add annotations-only controls (#1446) ([5150b0c](https://github.com/box/box-content-preview/commit/5150b0c)), closes [#1446](https://github.com/box/box-content-preview/issues/1446)
+* feat(annotations): hide page steppers on small-medium widths (#1450) ([fb500bd](https://github.com/box/box-content-preview/commit/fb500bd)), closes [#1450](https://github.com/box/box-content-preview/issues/1450)
+* feat(annotations): remove thumbnail toggle on small modalities (#1449) ([952a7bf](https://github.com/box/box-content-preview/commit/952a7bf)), closes [#1449](https://github.com/box/box-content-preview/issues/1449)
+* feat(annotations): remove zoom ctrls on mobile (#1451) ([7e92795](https://github.com/box/box-content-preview/commit/7e92795)), closes [#1451](https://github.com/box/box-content-preview/issues/1451)
+* feat(annotations): responsive media queries for annotations-only ctrls (#1448) ([4385fbc](https://github.com/box/box-content-preview/commit/4385fbc)), closes [#1448](https://github.com/box/box-content-preview/issues/1448)
+* feat(pdf): Update closure compiler to Babel (#1458) ([9d35e22](https://github.com/box/box-content-preview/commit/9d35e22)), closes [#1458](https://github.com/box/box-content-preview/issues/1458)
+* fix(fullscreen): fix fullscreen mode for ios/iphone combo (#1453) ([8345f7b](https://github.com/box/box-content-preview/commit/8345f7b)), closes [#1453](https://github.com/box/box-content-preview/issues/1453)
+
+
+
+## 2.84.0 (2022-03-24)
+
+* feat(docuworks): Add support for docuworks file types (#1444) ([61a1713](https://github.com/box/box-content-preview/commit/61a1713)), closes [#1444](https://github.com/box/box-content-preview/issues/1444)
+
+
+
+## 2.83.0 (2022-02-18)
+
+* feat(viewer): remove traces of boxdicom support (#1438) ([6c39352](https://github.com/box/box-content-preview/commit/6c39352)), closes [#1438](https://github.com/box/box-content-preview/issues/1438)
+* chore: Remove deprecated strict merge rules from mergify config (#1442) ([1edbfff](https://github.com/box/box-content-preview/commit/1edbfff)), closes [#1442](https://github.com/box/box-content-preview/issues/1442)
+
+
+
+## 2.82.0 (2021-12-16)
+
+* feat(viewer): Add focus trap for fullscreen (#1439) ([b09b349](https://github.com/box/box-content-preview/commit/b09b349)), closes [#1439](https://github.com/box/box-content-preview/issues/1439)
+
+
+
 ## 2.81.0 (2021-11-29)
 
 * feat(viewer): Add support for disabling .boxdicom file type (#1436) ([8b9a4a8](https://github.com/box/box-content-preview/commit/8b9a4a8)), closes [#1436](https://github.com/box/box-content-preview/issues/1436)

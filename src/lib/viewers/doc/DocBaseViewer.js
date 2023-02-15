@@ -5,10 +5,13 @@ import Browser from '../../Browser';
 import ControlsRoot from '../controls/controls-root';
 import DocControls from './DocControls';
 import DocFindBar from './DocFindBar';
+import PageTracker from '../../PageTracker';
 import Popup from '../../Popup';
 import PreviewError from '../../PreviewError';
 import RepStatus from '../../RepStatus';
 import ThumbnailsSidebar from '../../ThumbnailsSidebar';
+import Thumbnail from '../../Thumbnail';
+
 import { AnnotationInput, AnnotationMode, AnnotationState } from '../../AnnotationControlsFSM';
 import {
     ANNOTATOR_EVENT,
@@ -22,7 +25,6 @@ import {
     CLASS_HIDDEN,
     CLASS_IS_SCROLLABLE,
     DISCOVERABILITY_ATTRIBUTE,
-    DOC_STATIC_ASSETS_VERSION,
     DOCUMENT_FTUX_CURSOR_SEEN_KEY,
     ENCODING_TYPES,
     PERMISSION_DOWNLOAD,
@@ -40,12 +42,13 @@ import {
 } from '../../util';
 import { checkPermission, getRepresentation } from '../../file';
 import { ICON_PRINT_CHECKMARK } from '../../icons';
-import { JS, PRELOAD_JS, CSS } from './docAssets';
+import { CMAP, CSS, IMAGES, JS, PRELOAD_JS, WORKER } from './docAssets';
 import {
     ERROR_CODE,
     LOAD_METRIC,
     RENDER_EVENT,
     RENDER_METRIC,
+    REPORT_ACI,
     USER_DOCUMENT_THUMBNAIL_EVENTS,
     VIEWER_EVENT,
 } from '../../events';
@@ -57,6 +60,7 @@ export const DISCOVERABILITY_STATES = [
     AnnotationState.REGION_TEMP,
 ];
 
+const ACI_THUMB_MAX_WIDTH = 240;
 const CURRENT_PAGE_MAP_KEY = 'doc-current-page-map';
 const DEFAULT_SCALE_DELTA = 0.1;
 const IS_SAFARI_CLASS = 'is-safari';
@@ -93,9 +97,14 @@ class DocBaseViewer extends BaseViewer {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+    /** @property {Thumbnail} - Thumbnail reference */
+    advancedInsightsThumbs;
 
     /** @property {string} - Tracks the type of encoding, if applicable, that was requested for the viewable content */
     encoding;
+
+    /** @property {PageTracker} - PageTracker instance */
+    pageTracker;
 
     /**
      * @inheritdoc
@@ -106,6 +115,7 @@ class DocBaseViewer extends BaseViewer {
         // Bind context for callbacks
         this.applyCursorFtux = this.applyCursorFtux.bind(this);
         this.emitMetric = this.emitMetric.bind(this);
+        this.handleAdvancedInsightsReport = this.handleAdvancedInsightsReport.bind(this);
         this.handleAssetAndRepLoad = this.handleAssetAndRepLoad.bind(this);
         this.handleFindBarClose = this.handleFindBarClose.bind(this);
         this.handleAnnotationColorChange = this.handleAnnotationColorChange.bind(this);
@@ -181,6 +191,9 @@ class DocBaseViewer extends BaseViewer {
         }
 
         this.updateDiscoverabilityResinTag();
+        if (this.options.advancedContentInsights) {
+            this.pageTracker = new PageTracker(this.options.advancedContentInsights, this.options.file);
+        }
     }
 
     /**
@@ -240,6 +253,10 @@ class DocBaseViewer extends BaseViewer {
             this.rootEl.classList.remove(CLASS_BOX_PREVIEW_THUMBNAILS_OPEN);
             this.rootEl.removeChild(this.thumbnailsSidebarEl);
             this.thumbnailsSidebarEl = null;
+        }
+
+        if (this.pageTracker) {
+            this.pageTracker.destroy();
         }
 
         super.destroy();
@@ -665,7 +682,7 @@ class DocBaseViewer extends BaseViewer {
         this.pdfLinkService = new this.pdfjsViewer.PDFLinkService({
             eventBus: this.pdfEventBus,
             externalLinkRel: 'noopener noreferrer nofollow', // Prevent referrer hijacking
-            externalLinkTarget: this.pdfjsLib.LinkTarget.BLANK, // Open links in new tab
+            externalLinkTarget: Browser.isIE() ? this.pdfjsLib.LinkTarget.BLANK : this.pdfjsViewer.LinkTarget.BLANK, // Open links in new tab
         });
 
         this.pdfFindController = new this.pdfjsViewer.PDFFindController({
@@ -711,7 +728,7 @@ class DocBaseViewer extends BaseViewer {
         // Load PDF from representation URL and set as document for pdf.js. Cache task for destruction
         this.pdfLoadingTask = this.pdfjsLib.getDocument({
             cMapPacked: true,
-            cMapUrl: assetUrlCreator(`third-party/doc/${DOC_STATIC_ASSETS_VERSION}/cmaps/`),
+            cMapUrl: assetUrlCreator(CMAP),
             disableCreateObjectURL,
             disableFontFace,
             disableRange,
@@ -719,6 +736,11 @@ class DocBaseViewer extends BaseViewer {
             rangeChunkSize,
             url: appendQueryParams(pdfUrl, queryParams),
         });
+
+        if (this.pageTracker) {
+            this.addListener('preview_event_report', this.handlePreviewEventReport);
+            this.pageTracker.addListener('page_tracker_report', this.handleAdvancedInsightsReport);
+        }
 
         return this.pdfLoadingTask.promise
             .then(doc => {
@@ -770,16 +792,18 @@ class DocBaseViewer extends BaseViewer {
      */
     initPdfViewerClass(PdfViewerClass) {
         const { file, location } = this.options;
+        const { AnnotationMode: PDFAnnotationMode = {} } = this.pdfjsLib;
         const assetUrlCreator = createAssetUrlCreator(location);
         const hasDownload = checkPermission(file, PERMISSION_DOWNLOAD);
         const hasTextLayer = hasDownload && !this.getViewerOption('disableTextLayer');
         const textLayerMode = this.isMobile ? PDFJS_TEXT_LAYER_MODE.ENABLE : PDFJS_TEXT_LAYER_MODE.ENABLE_ENHANCE;
 
         return new PdfViewerClass({
+            annotationMode: PDFAnnotationMode.ENABLE, // Show annotations, but not forms
             container: this.docEl,
             eventBus: this.pdfEventBus,
             findController: this.pdfFindController,
-            imageResourcesPath: assetUrlCreator(`third-party/doc/${DOC_STATIC_ASSETS_VERSION}/images/`),
+            imageResourcesPath: assetUrlCreator(IMAGES),
             linkService: this.pdfLinkService,
             maxCanvasPixels: this.isMobile ? MOBILE_MAX_CANVAS_SIZE : -1,
             renderInteractiveForms: false, // Enabling prevents unverified signatures from being displayed
@@ -912,9 +936,8 @@ class DocBaseViewer extends BaseViewer {
         // Set pdf.js worker source location
         const { location } = this.options;
         const assetUrlCreator = createAssetUrlCreator(location);
-        const workerSrc = assetUrlCreator(`third-party/doc/${DOC_STATIC_ASSETS_VERSION}/pdf.worker.min.js`);
 
-        this.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+        this.pdfjsLib.GlobalWorkerOptions.workerSrc = assetUrlCreator(WORKER);
     }
 
     /**
@@ -1174,10 +1197,18 @@ class DocBaseViewer extends BaseViewer {
         // Broadcast that preview has 'loaded' when page structure is available
         if (!this.loaded) {
             this.loaded = true;
+            if (this.pageTracker) {
+                this.pageTracker.setCurrentPage(startPage);
+                this.pageTracker.setFileLength(pagesCount);
+                if (this.pageTracker.isActive()) {
+                    this.pageTracker.init();
+                }
+            }
             this.emit(VIEWER_EVENT.load, {
                 encoding: this.encoding,
                 numPages: pagesCount,
                 scale: currentScale,
+                currentPage: startPage,
             });
 
             // Add page IDs to each page after page structure is available
@@ -1283,6 +1314,10 @@ class DocBaseViewer extends BaseViewer {
         }
 
         this.emit('pagefocus', pageNumber);
+
+        if (this.pageTracker) {
+            this.pageTracker.handleViewerPageChange(pageNumber);
+        }
     }
 
     /**
@@ -1697,6 +1732,66 @@ class DocBaseViewer extends BaseViewer {
             this.containerEl.classList.add(CLASS_ANNOTATIONS_DOCUMENT_FTUX_CURSOR_SEEN);
         } else {
             this.cache.set(DOCUMENT_FTUX_CURSOR_SEEN_KEY, true, true);
+        }
+    }
+
+    /**
+     * Get the session id for the current preview if advanced insights is enabled.
+     *
+     * @protected
+     * @return {string | null} sessionId - Session id
+     */
+    getSessionId() {
+        if (this.pageTracker) {
+            return this.pageTracker.getSessionId();
+        }
+        return null;
+    }
+
+    /**
+     * Get a thumbnail image element
+     *
+     * @param {number} pageNumber - the page number
+     * @return {Promise} - promise resolves with the image HTMLElement or null if generation is in progress
+     */
+    getThumbnail(pageNumber) {
+        if (!this.advancedInsightsThumbs) {
+            this.advancedInsightsThumbs = new Thumbnail(this.pdfViewer);
+        }
+
+        return this.advancedInsightsThumbs.createThumbnailImage(pageNumber - 1, {
+            createImgTag: true,
+            thumbMaxWidth: ACI_THUMB_MAX_WIDTH,
+        });
+    }
+
+    /**
+     * Emit the report event so it can be propagated to parent listeners
+     *
+     * @protected
+     * @param {Object} data - Event payload
+     * @return {void}
+     */
+    handleAdvancedInsightsReport(data) {
+        this.emit(REPORT_ACI, data);
+    }
+
+    /**
+     * Set the preview event reported to the page tracker so it can start send Advanced Insights
+     * requests. If the event fails, destroy the tracker.
+     *
+     * @protected
+     * @param {boolean} success - Whether if the preview event was successfully reported or not
+     * @return {void}
+     */
+    handlePreviewEventReport(success) {
+        if (this.pageTracker) {
+            if (success) {
+                this.pageTracker.setPreviewEventReported(success);
+            } else {
+                this.pageTracker.destroy();
+                this.pageTracker = null;
+            }
         }
     }
 }

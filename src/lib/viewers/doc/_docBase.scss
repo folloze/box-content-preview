@@ -1,3 +1,4 @@
+@import '~box-ui-elements/es/styles/variables';
 @import '../../boxuiVariables';
 @import './annotations';
 @import './mixins';
@@ -138,7 +139,7 @@ $thumbnail-sidebar-width: 191px; // Extra pixel to account for sidebar border
         }
     }
 
-    @media (min-width: 600px) {
+    @media (min-width: $size-large-min) {
         $bp-thumbnails-animation: 300ms cubic-bezier(.4, 0, .2, 1);
 
         &.bp-loaded.bp-thumbnails-open-active,
@@ -197,6 +198,12 @@ $thumbnail-sidebar-width: 191px; // Extra pixel to account for sidebar border
         .bp-ThumbnailsToggle {
             display: flex;
         }
+    }
+}
+
+@include breakpoint($medium-screen) {
+    .bp-is-mobile .bp-ZoomControls {
+        display: none;
     }
 }
 
@@ -396,6 +403,28 @@ $thumbnail-sidebar-width: 191px; // Extra pixel to account for sidebar border
 
             span {
                 pointer-events: auto;
+            }
+        }
+    }
+
+    &.bp-annotations-only-controls {
+        @include breakpoint($medium-screen) {
+            &.bp-annotations-create--drawing,
+            &.bp-annotations-create--highlight,
+            &.bp-annotations-create--region {
+                // Show exit button when annotation-only controls is active
+                .bp-AnnotationsControls-exitBtn {
+                    display: block;
+                }
+
+                // Hide all ControlBarGroups except for last instance which contains AnnotationsControls
+                // and hide all direct children of the group that isn't AnnotationControls
+                .bp-ControlsBarGroup {
+                    &:not(:last-child),
+                    > *:not(.bp-AnnotationsControls) {
+                        display: none;
+                    }
+                }
             }
         }
     }

@@ -30,12 +30,12 @@ git clone https://github.com/mozilla/pdfjs-dist.git --depth 1 --single-branch --
 echo "-----------------------------------------------------------------------------------"
 echo "Copying relevant files to third-party directory..."
 echo "-----------------------------------------------------------------------------------"
-\cp -rf pdfjs-dist/es5/build/pdf.js ${DOC_STATIC_ASSETS_PATH}
-\cp -rf pdfjs-dist/es5/build/pdf.min.js ${DOC_STATIC_ASSETS_PATH}
-\cp -rf pdfjs-dist/es5/build/pdf.worker.js ${DOC_STATIC_ASSETS_PATH}
-\cp -rf pdfjs-dist/es5/build/pdf.worker.min.js ${DOC_STATIC_ASSETS_PATH}
-\cp -rf pdfjs-dist/es5/web/pdf_viewer.css ${DOC_STATIC_ASSETS_PATH}
-\cp -rf pdfjs-dist/es5/web/pdf_viewer.js ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/build/pdf.js ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/build/pdf.min.js ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/build/pdf.worker.js ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/build/pdf.worker.min.js ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/web/pdf_viewer.css ${DOC_STATIC_ASSETS_PATH}
+\cp -rf pdfjs-dist/legacy/web/pdf_viewer.js ${DOC_STATIC_ASSETS_PATH}
 \cp -rf pdfjs-dist/cmaps ${DOC_STATIC_ASSETS_PATH}/cmaps
 rm -rf ./pdfjs-dist/
 
@@ -50,11 +50,6 @@ echo "--------------------------------------------------------------------------
 echo "Enabling e-signature rendering without validation..."
 echo "-----------------------------------------------------------------------------------"
 sed -e 's@;r.setFlags(o.AnnotationFlag.HIDDEN)@@' -i '' ${DOC_STATIC_ASSETS_PATH}/pdf.worker.min.js
-
-# Fix for Courier font PDF not rendering applied to src/third-party/doc/2.76.0/pdf.worker*.js which is PDFJS v2.2.228
-# Link to issue: https://github.com/mozilla/pdf.js/issues/13771
-# This fix may not need to be applied if next upgrade is >= 2.5.x
-# See https://github.com/box/box-content-preview/pull/1414 for more details
 
 # Minify using Google Closure Compiler, options:
 # Output to ES5 (Box supports Chrome, Edge, IE11, Firefox, Safari, and newer versions of iOS, Android)

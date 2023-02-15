@@ -940,6 +940,9 @@ class Preview extends EventEmitter {
 
         this.options.enableAnnotationsImageDiscoverability = !!options.enableAnnotationsImageDiscoverability;
 
+        // Enable annotations-only control bar when selecting any annotation
+        this.options.enableAnnotationsOnlyControls = !!options.enableAnnotationsOnlyControls;
+
         // Enable or disable hotkeys
         this.options.useHotkeys = options.useHotkeys !== false;
 
@@ -1000,6 +1003,9 @@ class Preview extends EventEmitter {
 
         // Add the response interceptor to the preview instance
         this.options.responseInterceptor = options.responseInterceptor;
+
+        // Advanced Content Insights
+        this.options.advancedContentInsights = options.advancedContentInsights;
 
         // Disable or enable viewers based on viewer options
         Object.keys(this.options.viewers).forEach(viewerName => {
@@ -1413,17 +1419,30 @@ class Preview extends EventEmitter {
         };
         const headers = getHeaders({}, token, sharedLink, sharedLinkPassword);
 
+        if (this.viewer && this.viewer.getSessionId) {
+            const sessionId = this.viewer.getSessionId();
+            if (sessionId) {
+                data.additional_information = {
+                    view_session: {
+                        session_id: sessionId,
+                    },
+                };
+            }
+        }
+
         this.api
             .post(`${apiHost}/2.0/events`, data, { headers })
             .then(() => {
                 // Reset retry count after successfully logging
                 this.logRetryCount = 0;
+                this.viewer.emit('preview_event_report', true);
             })
             .catch(() => {
                 // Don't retry more than the retry limit
                 this.logRetryCount += 1;
                 if (this.logRetryCount > LOG_RETRY_COUNT) {
                     this.logRetryCount = 0;
+                    this.viewer.emit('preview_event_report', false);
                     return;
                 }
 
@@ -1808,6 +1827,20 @@ class Preview extends EventEmitter {
     updateExperiences(experiences) {
         if (this.viewer && this.viewer.updateExperiences) {
             this.viewer.updateExperiences(experiences);
+        }
+    }
+
+    /**
+     * Updates advanced content insights options after props have changed in parent app
+     *
+     * @public
+     * @param {Object} options - new content insights options value
+     * @return {void}
+     */
+    updateContentInsightsOptions(options) {
+        if (this.viewer && this.viewer.pageTracker) {
+            this.previewOptions = { ...this.previewOptions, contentInsights: options };
+            this.viewer.pageTracker.updateOptions(this.previewOptions.contentInsights);
         }
     }
 

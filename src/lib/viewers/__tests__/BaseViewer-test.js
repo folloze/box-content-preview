@@ -5,6 +5,7 @@ import * as util from '../../util';
 import Api from '../../api';
 import BaseViewer from '../BaseViewer';
 import Browser from '../../Browser';
+import FocusTrap from '../../FocusTrap';
 import fullscreen from '../../Fullscreen';
 import intl from '../../i18n';
 import PreviewError from '../../PreviewError';
@@ -18,6 +19,8 @@ let base;
 let containerEl;
 let stubs = {};
 const { ANNOTATOR_EVENT } = constants;
+
+jest.mock('../../FocusTrap');
 
 describe('lib/viewers/BaseViewer', () => {
     beforeEach(() => {
@@ -59,6 +62,7 @@ describe('lib/viewers/BaseViewer', () => {
             jest.spyOn(base, 'loadBoxAnnotations').mockResolvedValue(undefined);
             base.options.showAnnotations = true;
             base.options.enableAnnotationsDiscoverability = true;
+            base.options.enableAnnotationsOnlyControls = true;
 
             base.setup();
 
@@ -73,10 +77,12 @@ describe('lib/viewers/BaseViewer', () => {
                 },
                 showAnnotations: true,
                 enableAnnotationsDiscoverability: true,
+                enableAnnotationsOnlyControls: true,
             });
 
             expect(base.containerEl).toHaveClass(constants.CLASS_BOX_PREVIEW_CONTENT);
             expect(base.containerEl).toHaveClass(constants.CLASS_ANNOTATIONS_DISCOVERABLE);
+            expect(base.containerEl).toHaveClass(constants.CLASS_ANNOTATIONS_ONLY_CONTROLS);
             expect(base.addCommonListeners).toBeCalled();
             expect(typeof base.loadTimeout).toBe('number');
             expect(base.annotatorPromise).toBeDefined();
@@ -500,6 +506,9 @@ describe('lib/viewers/BaseViewer', () => {
     });
 
     describe('handleFullscreenEnter()', () => {
+        beforeEach(() => {
+            base.containerEl = document.querySelector('.bp-content');
+        });
         test('should resize the viewer', () => {
             jest.spyOn(base, 'resize');
 
@@ -534,6 +543,28 @@ describe('lib/viewers/BaseViewer', () => {
             expect(base.disableAnnotationControls).toBeCalled();
             expect(base.processAnnotationModeChange).toBeCalledWith(AnnotationMode.NONE);
         });
+
+        test('should enable the focus trap', () => {
+            jest.spyOn(FocusTrap.prototype, 'constructor');
+            jest.spyOn(FocusTrap.prototype, 'enable');
+
+            base.handleFullscreenEnter();
+
+            expect(FocusTrap.prototype.constructor).toBeCalledWith(base.containerEl);
+            expect(FocusTrap.prototype.enable).toBeCalled();
+        });
+
+        test('should reuse any existing focus trap', () => {
+            jest.spyOn(FocusTrap.prototype, 'constructor');
+
+            const mockFocusTrap = { destroy: jest.fn(), enable: jest.fn() };
+            base.focusTrap = mockFocusTrap;
+
+            base.handleFullscreenEnter();
+
+            expect(FocusTrap.prototype.constructor).not.toBeCalledWith(base.containerEl);
+            expect(mockFocusTrap.enable).toBeCalled();
+        });
     });
 
     describe('handleFullscreenExit()', () => {
@@ -562,6 +593,15 @@ describe('lib/viewers/BaseViewer', () => {
 
             expect(base.annotator.emit).toBeCalledWith(ANNOTATOR_EVENT.setVisibility, true);
             expect(base.enableAnnotationControls).toBeCalled();
+        });
+
+        test('should disable any existing focus trap', () => {
+            const mockFocusTrap = { destroy: jest.fn(), disable: jest.fn() };
+            base.focusTrap = mockFocusTrap;
+
+            base.handleFullscreenExit();
+
+            expect(mockFocusTrap.disable).toBeCalled();
         });
     });
 
@@ -615,6 +655,8 @@ describe('lib/viewers/BaseViewer', () => {
             expect(fullscreen.removeAllListeners).toBeCalled();
             expect(base.removeAllListeners).toBeCalled();
             expect(base.containerEl.innerHTML).toBe('');
+            expect(base.containerEl.classList.contains(constants.CLASS_ANNOTATIONS_DISCOVERABLE)).toBe(false);
+            expect(base.containerEl.classList.contains(constants.CLASS_ANNOTATIONS_ONLY_CONTROLS)).toBe(false);
             expect(base.destroyed).toBe(true);
             expect(base.emit).toBeCalledWith('destroy');
         });
@@ -650,6 +692,15 @@ describe('lib/viewers/BaseViewer', () => {
             base.destroy();
 
             expect(base.containerEl.removeEventListener).toBeCalledWith('contextmenu', expect.any(Function));
+        });
+
+        test('should clean up any focus trap', () => {
+            const mockFocusTrap = { destroy: jest.fn() };
+
+            base.focusTrap = mockFocusTrap;
+            base.destroy();
+
+            expect(mockFocusTrap.destroy).toBeCalled();
         });
     });
 
