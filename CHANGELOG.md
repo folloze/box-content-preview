@@ -1,3 +1,77 @@
+## 2.100.0 (2023-08-04)
+
+* fix(a11y): screen reader support for view only file preview (#1495) ([9a0b4ab](https://github.com/box/box-content-preview/commit/9a0b4ab)), closes [#1495](https://github.com/box/box-content-preview/issues/1495)
+* fix(pdf): Move controls layer above popup layer (#1499) ([9598097](https://github.com/box/box-content-preview/commit/9598097)), closes [#1499](https://github.com/box/box-content-preview/issues/1499)
+
+
+
+## 2.99.0 (2023-08-02)
+
+* feat(pdf): Move annotation marker styling back to sdk (#1498) ([a6821cf](https://github.com/box/box-content-preview/commit/a6821cf)), closes [#1498](https://github.com/box/box-content-preview/issues/1498)
+* feat(pdf): Move annotation styling to box-annotations (#1497) ([07fccf2](https://github.com/box/box-content-preview/commit/07fccf2)), closes [#1497](https://github.com/box/box-content-preview/issues/1497)
+
+
+
+## 2.98.0 (2023-07-31)
+
+* feat(node-18-upgrade): Node 18 Upgrade (#1491) ([05f31b8](https://github.com/box/box-content-preview/commit/05f31b8)), closes [#1491](https://github.com/box/box-content-preview/issues/1491)
+* feat(pdf): Fix commenting on expiring embed links (#1493) ([b3c8b6f](https://github.com/box/box-content-preview/commit/b3c8b6f)), closes [#1493](https://github.com/box/box-content-preview/issues/1493)
+* Revert "feat(node-18-upgrade): Node 18 Upgrade (#1491)" (#1494) ([df8a3d5](https://github.com/box/box-content-preview/commit/df8a3d5)), closes [#1491](https://github.com/box/box-content-preview/issues/1491) [#1494](https://github.com/box/box-content-preview/issues/1494)
+* fix(preview): fix auto scroll issue with embed preview (#1492) ([58f278f](https://github.com/box/box-content-preview/commit/58f278f)), closes [#1492](https://github.com/box/box-content-preview/issues/1492)
+
+
+
+## 2.97.0 (2023-07-24)
+
+* fix(a11y): replace instructions (#1488) ([50ff7bb](https://github.com/box/box-content-preview/commit/50ff7bb)), closes [#1488](https://github.com/box/box-content-preview/issues/1488)
+* fix(a11y): video player thumbnail has no text alternative (#1486) ([bd3935b](https://github.com/box/box-content-preview/commit/bd3935b)), closes [#1486](https://github.com/box/box-content-preview/issues/1486)
+* fix(copy-paste-issue): PDFJS copy paste fix (#1489) ([9625e46](https://github.com/box/box-content-preview/commit/9625e46)), closes [#1489](https://github.com/box/box-content-preview/issues/1489)
+* feat(pdf): Fix search and highlight + comment tooltip (#1490) ([f937052](https://github.com/box/box-content-preview/commit/f937052)), closes [#1490](https://github.com/box/box-content-preview/issues/1490)
+
+
+
+## 2.96.0 (2023-07-05)
+
+* feat(pdf): Upgrade Cypress for PDFjs update (#1482) ([92758e6](https://github.com/box/box-content-preview/commit/92758e6)), closes [#1482](https://github.com/box/box-content-preview/issues/1482)
+* feat(pdf): Upgrade PDFjs version (#1485) ([d81771d](https://github.com/box/box-content-preview/commit/d81771d)), closes [#1485](https://github.com/box/box-content-preview/issues/1485)
+* fix(e2e-tests): fixing hd video player test (#1484) ([42a9eb8](https://github.com/box/box-content-preview/commit/42a9eb8)), closes [#1484](https://github.com/box/box-content-preview/issues/1484)
+
+
+
+## 2.95.0 (2023-06-08)
+
+* chore(sass): replace node-sass with sass (#1479) ([46c63e9](https://github.com/box/box-content-preview/commit/46c63e9)), closes [#1479](https://github.com/box/box-content-preview/issues/1479)
+* feat(feature-toggles): Add feature object to standardize feature toggles (#1477) ([27792bb](https://github.com/box/box-content-preview/commit/27792bb)), closes [#1477](https://github.com/box/box-content-preview/issues/1477)
+* fix(e2e-tests): Update doc assets to 2.90 (#1478) ([0f172a8](https://github.com/box/box-content-preview/commit/0f172a8)), closes [#1478](https://github.com/box/box-content-preview/issues/1478)
+
+
+
+## 2.94.0 (2023-05-26)
+
+* fix(pdf): upgrade pdfjs to 3.6.172 (#1476) ([118ec64](https://github.com/box/box-content-preview/commit/118ec64)), closes [#1476](https://github.com/box/box-content-preview/issues/1476)
+
+
+
+## 2.93.0 (2023-05-05)
+
+* fix(media): upgrade shaka player version (#1473) ([6d07ebb](https://github.com/box/box-content-preview/commit/6d07ebb)), closes [#1473](https://github.com/box/box-content-preview/issues/1473)
+
+
+
+## 2.92.0 (2023-04-26)
+
+* fix(content-insights): events recurrent request issue (#1472) ([7797b3e](https://github.com/box/box-content-preview/commit/7797b3e)), closes [#1472](https://github.com/box/box-content-preview/issues/1472)
+* fix(version): revert package.json version (#1471) ([5d01bb4](https://github.com/box/box-content-preview/commit/5d01bb4)), closes [#1471](https://github.com/box/box-content-preview/issues/1471)
+* chore(release): 2.91.0 ([fd503db](https://github.com/box/box-content-preview/commit/fd503db))
+
+
+
+## 2.91.0 (2023-03-24)
+
+* feat(content-insights): Added ACI support to track per page time spent (#1455) ([a05e504](https://github.com/box/box-content-preview/commit/a05e504)), closes [#1455](https://github.com/box/box-content-preview/issues/1455)
+
+
+
 ## 2.90.0 (2023-01-25)
 
 * revert package.json change (#1469) ([96b9198](https://github.com/box/box-content-preview/commit/96b9198)), closes [#1469](https://github.com/box/box-content-preview/issues/1469)
